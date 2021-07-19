@@ -1,6 +1,9 @@
 package rulematch
 
 type IChecker interface {
+	DoCheck() bool
+	GetResult() bool
+	GetFailReason() []FailedReason
 	In(cond *Cond, input string) bool
 	NotIn(cond *Cond, input string) bool
 	GT(cond *Cond, input string) bool
@@ -13,8 +16,6 @@ type IChecker interface {
 	VersionGE(cond *Cond, input string) bool
 	VersionLT(cond *Cond, input string) bool
 	VersionLE(cond *Cond, input string) bool
-	TimeBefore(cond *Cond, input string) bool
-	TimeAfter(cond *Cond, input string) bool
 }
 
 type Checker struct {

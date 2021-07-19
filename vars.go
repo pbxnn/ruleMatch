@@ -15,8 +15,6 @@ const (
 	OP_VERSION_GE  = "version>="
 	OP_VERSION_LT  = "version<"
 	OP_VERSION_LE  = "version<="
-	OP_TIME_BEFORE = "time<="
-	OP_TIME_AFTER  = "time>="
 
 	CONF_CACHE_EXPIRE = 10 //本地缓存过期时间（秒）
 )
@@ -34,16 +32,14 @@ var OpFuncMap = map[string]func(IChecker, *Cond, string) bool{
 	OP_VERSION_GE:  IChecker.VersionGE,
 	OP_VERSION_LT:  IChecker.VersionLT,
 	OP_VERSION_LE:  IChecker.VersionLE,
-	OP_TIME_BEFORE: IChecker.TimeBefore,
-	OP_TIME_AFTER:  IChecker.TimeAfter,
 }
 
 var ConfCache = struct {
 	Mu         *sync.RWMutex
-	ConfMap    map[string]*RuleConf
+	ConfMap    map[string]RuleConf
 	VersionMap map[string]int64
 }{
 	Mu:         &sync.RWMutex{},
-	ConfMap:    map[string]*RuleConf{},
+	ConfMap:    map[string]RuleConf{},
 	VersionMap: map[string]int64{},
 }

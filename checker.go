@@ -7,25 +7,33 @@ import (
 	"strconv"
 )
 
-func NewChecker(ruleName string, ruleConf RuleConf, params map[string]string) IChecker {
+func NewChecker(ruleName string, params map[string]string) IChecker {
 	return &Checker{
 		RuleName: ruleName,
-		Conf:     ruleConf,
+		Conf:     LoadConf(ruleName),
 		Params:   params,
 		IsMatch:  false,
 	}
 }
 
-func (c *Checker) DoCheck() {
+func (c *Checker) GetFailReason() []FailedReason {
+	return c.ReasonList
+}
+
+func (c *Checker) GetResult() bool {
+	return c.IsMatch
+}
+
+func (c *Checker) DoCheck() bool {
 
 	if len(c.Params) == 0 {
 		c.fail(nil, "empty params")
-		return
+		return c.IsMatch
 	}
 
-	if len(c.Conf) == 0 {
+	if c.Conf == nil || len(c.Conf) == 0 {
 		c.fail(nil, "empty conf")
-		return
+		return c.IsMatch
 	}
 
 	sort.Sort(c.Conf)
@@ -37,9 +45,11 @@ func (c *Checker) DoCheck() {
 
 		if c.check(item.CondList) {
 			c.IsMatch = true
-			return
+			return c.IsMatch
 		}
 	}
+
+	return c.IsMatch
 }
 
 func (c *Checker) check(condList []Cond) bool {
@@ -157,22 +167,22 @@ func (c *Checker) VersionLE(cond *Cond, input string) bool {
 	}
 	return VersionCompare(input, cond.Value[0]) <= 0
 }
-
-func (c *Checker) TimeBefore(cond *Cond, input string) bool {
-	condTime, inputTime, err := convert(cond.Value, input)
-	if err != nil {
-		return false
-	}
-	return inputTime < condTime
-}
-
-func (c *Checker) TimeAfter(cond *Cond, input string) bool {
-	condTime, inputTime, err := convert(cond.Value, input)
-	if err != nil {
-		return false
-	}
-	return inputTime > condTime
-}
+//
+//func (c *Checker) TimeBefore(cond *Cond, input string) bool {
+//	condTime, inputTime, err := convert(cond.Value, input)
+//	if err != nil {
+//		return false
+//	}
+//	return inputTime < condTime
+//}
+//
+//func (c *Checker) TimeAfter(cond *Cond, input string) bool {
+//	condTime, inputTime, err := convert(cond.Value, input)
+//	if err != nil {
+//		return false
+//	}
+//	return inputTime > condTime
+//}
 
 func convert(condValue []string, input string) (int, int, error) {
 	if len(condValue) != 1 {
@@ -181,12 +191,12 @@ func convert(condValue []string, input string) (int, int, error) {
 
 	condNum, err := strconv.Atoi(condValue[0])
 	if err != nil {
-		return 0, 0, err
+		return condNum, 0, err
 	}
 
 	inputNum, err := strconv.Atoi(input)
 	if err != nil {
-		return 0, 0, err
+		return condNum, inputNum, err
 	}
 
 	return condNum, inputNum, nil
