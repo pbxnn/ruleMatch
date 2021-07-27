@@ -6,6 +6,7 @@ import (
 )
 
 func TestLoadConfFromDB(t *testing.T) {
+    InitConfCache()
     ruleName := "testConf"
     conf := LoadConfFromDB(ruleName)
     t.Log(conf)
@@ -18,13 +19,15 @@ func TestLoadConfFromDB(t *testing.T) {
 }
 
 func TestLoadConfFromCache(t *testing.T) {
+    InitConfCache()
     ruleName := "testConf"
-    conf := LoadConfFromCache(ruleName)
+    conf := GetFromCache(ruleName)
     t.Log(conf)
     t.Log(ConfCache.ConfMap, ConfCache.VersionMap)
 }
 
 func TestLoadConf(t *testing.T) {
+    InitConfCache()
     ruleName := "testConf"
     conf := LoadConf(ruleName)
     t.Log(conf)

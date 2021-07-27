@@ -7,10 +7,10 @@ import (
 	"strconv"
 )
 
-func NewChecker(ruleName string, params map[string]string) IChecker {
+func NewChecker(ruleName string, conf RuleConf, params map[string]string) IChecker {
 	return &Checker{
 		RuleName: ruleName,
-		Conf:     LoadConf(ruleName),
+		Conf:     conf,
 		Params:   params,
 		IsMatch:  false,
 	}

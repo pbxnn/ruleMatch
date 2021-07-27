@@ -12,7 +12,7 @@ func InStringSlice(collection []string, target string) bool {
 	return false
 }
 
-// 该函数比较两个版本号是否相等，是否大于或小于的关系
+// VersionCompare 该函数比较两个版本号是否相等，是否大于或小于的关系
 // 返回值：0表示v1与v2相等；1表示v1大于v2；2表示v1小于v2
 func VersionCompare(v1, v2 string) int {
 	// 替换一些常见的版本符号

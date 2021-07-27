@@ -34,12 +34,8 @@ var OpFuncMap = map[string]func(IChecker, *Cond, string) bool{
 	OP_VERSION_LE:  IChecker.VersionLE,
 }
 
-var ConfCache = struct {
+var ConfCache struct {
 	Mu         *sync.RWMutex
 	ConfMap    map[string]RuleConf
 	VersionMap map[string]int64
-}{
-	Mu:         &sync.RWMutex{},
-	ConfMap:    map[string]RuleConf{},
-	VersionMap: map[string]int64{},
 }

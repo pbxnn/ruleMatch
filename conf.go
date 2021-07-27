@@ -3,11 +3,18 @@ package rulematch
 import (
     "encoding/json"
     "fmt"
+    "sync"
     "time"
 )
 
+func InitConfCache() {
+    ConfCache.Mu = &sync.RWMutex{}
+    ConfCache.ConfMap = map[string]RuleConf{}
+    ConfCache.VersionMap = map[string]int64{}
+}
+
 func LoadConf(ruleName string) RuleConf {
-    conf := LoadConfFromCache(ruleName)
+    conf := GetFromCache(ruleName)
     if conf != nil {
         return conf
     }
@@ -15,7 +22,7 @@ func LoadConf(ruleName string) RuleConf {
     return LoadConfFromDB(ruleName)
 }
 
-func LoadConfFromCache(ruleName string) RuleConf {
+func GetFromCache(ruleName string) RuleConf {
     if len(ConfCache.ConfMap) == 0 {
         return nil
     }
@@ -38,22 +45,24 @@ func LoadConfFromCache(ruleName string) RuleConf {
     return conf
 }
 
+// SetCache 更新cache + version
+func SetCache(ruleName string, conf RuleConf) {
+    ConfCache.Mu.Lock()
+    ConfCache.ConfMap[ruleName] = conf
+    ConfCache.VersionMap[ruleName] = time.Now().Unix()
+    ConfCache.Mu.Unlock()
+}
+
 func LoadConfFromDB(ruleName string) RuleConf {
 
     var conf RuleConf
-    ConfCache.Mu.Lock()
-    //读取配置
+    //读取配置(mock)
     confStr := getConf()
     if err := json.Unmarshal([]byte(confStr), &conf); err != nil {
         fmt.Println(err)
         return nil
     }
-
-    //更新cache + version
-    ConfCache.ConfMap[ruleName] = conf
-    ConfCache.VersionMap[ruleName] = time.Now().Unix()
-
-    ConfCache.Mu.Unlock()
+    SetCache(ruleName, conf)
     return ConfCache.ConfMap[ruleName]
 }
 

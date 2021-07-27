@@ -1,21 +1,24 @@
 package rulematch
 
 import (
+    "encoding/json"
+    "fmt"
     "github.com/stretchr/testify/assert"
     "testing"
 )
 
-func getTestParams() map[string]string{
+func getTestParams() map[string]string {
     return map[string]string{
-        "studentUid":"100",
-        "sbschoolId":"100",
-        "vc":"1.1.0",
+        "studentUid": "100",
+        "sbschoolId": "100",
+        "vc":         "1.1.0",
     }
 }
 
 func getTestChecker() IChecker {
     params := getTestParams()
-    return NewChecker("testConf", params)
+    conf := getTestConf()
+    return NewChecker("testConf", conf, params)
 }
 
 func TestChecker_DoCheck(t *testing.T) {
@@ -26,14 +29,14 @@ func TestChecker_DoCheck(t *testing.T) {
 }
 
 func TestChecker_In(t *testing.T) {
-    cond := &Cond{Key: "studentUid", Op: "in", Value: []string{"1","2","3"}}
+    cond := &Cond{Key: "studentUid", Op: "in", Value: []string{"1", "2", "3"}}
     checker := getTestChecker()
     r := checker.In(cond, "1")
     assert.True(t, r)
 }
 
 func TestChecker_NotIn(t *testing.T) {
-    cond := &Cond{Key: "studentUid", Op: "notIn", Value: []string{"1","2","3"}}
+    cond := &Cond{Key: "studentUid", Op: "notIn", Value: []string{"1", "2", "3"}}
     checker := getTestChecker()
     r := checker.NotIn(cond, "100")
     assert.True(t, r)
@@ -107,4 +110,124 @@ func TestChecker_VersionLE(t *testing.T) {
     checker := getTestChecker()
     r := checker.VersionLE(cond, "1.1.0")
     assert.True(t, r)
+}
+
+func getTestConf() RuleConf {
+    var testConfJson = `
+[
+    {
+        "condList":[
+            {
+                "key":"studentUid",
+                "op":"in",
+                "value":[
+                    "100",
+                    "200",
+                    "300"
+                ]
+            },
+            {
+                "key":"sbschoolId",
+                "op":"notIn",
+                "value":[
+                    "1",
+                    "2",
+                    "3"
+                ]
+            },
+            {
+                "key":"studentUid",
+                "op":"randBy",
+                "value":[
+                    "100"
+                ]
+            },
+            {
+                "key":"studentUid",
+                "op":">=",
+                "value":[
+                    "100"
+                ]
+            },
+            {
+                "key":"studentUid",
+                "op":">",
+                "value":[
+                    "99"
+                ]
+            },
+            {
+                "key":"studentUid",
+                "op":"<=",
+                "value":[
+                    "100"
+                ]
+            },
+            {
+                "key":"studentUid",
+                "op":"<",
+                "value":[
+                    "101"
+                ]
+            },
+            {
+                "key":"vc",
+                "op":"version>",
+                "value":[
+                    "1.0.9"
+                ]
+            },
+            {
+                "key":"vc",
+                "op":"version>=",
+                "value":[
+                    "1.1.0"
+                ]
+            },
+            {
+                "key":"vc",
+                "op":"version<",
+                "value":[
+                    "1.1.1"
+                ]
+            },
+            {
+                "key":"vc",
+                "op":"version<=",
+                "value":[
+                    "1.1.0"
+                ]
+            }
+        ],
+        "seq":1
+    },
+    {
+        "condList":[
+            {
+                "key":"sbschoolId",
+                "op":"notIn",
+                "value":[
+                    "2",
+                    "3"
+                ]
+            },
+            {
+                "key":"studentUid",
+                "op":"rand",
+                "value":[
+                    "100"
+                ]
+            }
+        ],
+        "seq":2
+    }
+]
+`
+
+    var conf RuleConf
+    if err := json.Unmarshal([]byte(testConfJson), &conf); err != nil {
+        fmt.Println(err)
+        return nil
+    }
+    return conf
 }
