@@ -31,6 +31,8 @@ func GetFromCache(ruleName string) RuleConf {
         return nil
     }
 
+    ConfCache.Mu.Lock()
+    defer ConfCache.Mu.Unlock()
     conf, ok := ConfCache.ConfMap[ruleName]
     if !ok || conf == nil {
         return nil
